@@ -1,0 +1,111 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.univ2026.proformas.modelo;
+
+/**
+ *
+ * @author dfcarrera
+ */
+public class Cliente {
+    private String identificacion;
+    private String nombre;
+    private String direccion;
+    private String telefono;
+    private String email;
+    private boolean activo;
+
+    /** Crea un cliente con datos de contacto vacios. */
+    public Cliente(String identificacion, String nombre) {
+        this(identificacion, nombre, "", "", "", true);
+    }
+
+    /** Crea un cliente y aplica las mismas validaciones que los setters. */
+    public Cliente(
+            String identificacion, String nombre, String direccion, String telefono, String email, boolean activo) {
+        setIdentificacion(identificacion);
+        setNombre(nombre);
+        setDireccion(direccion);
+        setTelefono(telefono);
+        setEmail(email);
+        setActivo(activo);
+    }
+
+    public String getIdentificacion() {
+        return identificacion;
+    }
+
+    public void setIdentificacion(String identificacion) {
+        this.identificacion = textoObligatorio(identificacion, "La identificacion no puede estar vacia");
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = textoObligatorio(nombre, "El nombre no puede estar vacio");
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = textoOpcional(direccion, "La direccion no puede ser null");
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = textoOpcional(telefono, "El telefono no puede ser null");
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        String emailNormalizado = textoOpcional(email, "El email no puede ser null");
+        int arroba = emailNormalizado.lastIndexOf('@');
+        boolean dominioValido = arroba >= 1
+                && arroba < emailNormalizado.length() - 1
+                && emailNormalizado.substring(arroba + 1).contains(".");
+        if (!emailNormalizado.isEmpty() && !dominioValido) {
+            throw new IllegalArgumentException("El email no tiene un formato valido");
+        }
+        this.email = emailNormalizado;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    /** Retorna una representacion legible sin imprimirla. */
+    public String resumen() {
+        String estado = activo ? "activo" : "inactivo";
+        return "[" + identificacion + "] " + nombre + " - " + direccion + " - " + telefono + " - " + email + " - "
+                + estado;
+    }
+
+    private static String textoObligatorio(String valor, String mensaje) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException(mensaje);
+        }
+        return valor.trim();
+    }
+
+    private static String textoOpcional(String valor, String mensaje) {
+        if (valor == null) {
+            throw new IllegalArgumentException(mensaje);
+        }
+        return valor.trim();
+    }
+}
