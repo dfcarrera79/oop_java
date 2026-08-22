@@ -1,15 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.univ2026.proformas.modelo;
 
 import java.util.Locale;
 
-/**
- *
- * @author dfcarrera
- */
+/** Representa un producto generico del catalogo. */
 public class Producto {
     private String codigo;
     private String nombre;
