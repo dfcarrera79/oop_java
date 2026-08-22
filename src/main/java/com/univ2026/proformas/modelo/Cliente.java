@@ -1,13 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.univ2026.proformas.modelo;
 
-/**
- *
- * @author dfcarrera
- */
+/** Representa una persona o empresa a la que se emiten proformas. */
 public class Cliente {
     private String identificacion;
     private String nombre;
