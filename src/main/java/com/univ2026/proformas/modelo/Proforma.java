@@ -1,7 +1,5 @@
 package com.univ2026.proformas.modelo;
 
-import com.univ2026.proformas.modelo.Cliente;
-import com.univ2026.proformas.modelo.ItemProforma;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

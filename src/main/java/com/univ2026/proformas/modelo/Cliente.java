@@ -1,23 +1,35 @@
 package com.univ2026.proformas.modelo;
 
+import com.univ2026.proformas.modelo.valor.Email;
+import com.univ2026.proformas.modelo.valor.RUC;
+import java.util.Objects;
+
 /** Representa una persona o empresa a la que se emiten proformas. */
 public class Cliente {
-    private String identificacion;
+    private final RUC identificacion;
     private String nombre;
     private String direccion;
     private String telefono;
-    private String email;
+    private Email email;
     private boolean activo;
 
     /** Crea un cliente con datos de contacto vacios. */
     public Cliente(String identificacion, String nombre) {
-        this(identificacion, nombre, "", "", "", true);
+        this(new RUC(identificacion), nombre, "", "", new Email(""), true);
     }
 
     /** Crea un cliente y aplica las mismas validaciones que los setters. */
     public Cliente(
             String identificacion, String nombre, String direccion, String telefono, String email, boolean activo) {
-        setIdentificacion(identificacion);
+        this(new RUC(identificacion), nombre, direccion, telefono, new Email(email), activo);
+    }
+
+    /** Crea un cliente con modelos de valor para identificacion y correo. */
+    public Cliente(RUC identificacion, String nombre, String direccion, String telefono, Email email, boolean activo) {
+        if (identificacion == null) {
+            throw new IllegalArgumentException("La identificacion no puede ser null");
+        }
+        this.identificacion = identificacion;
         setNombre(nombre);
         setDireccion(direccion);
         setTelefono(telefono);
@@ -25,12 +37,8 @@ public class Cliente {
         setActivo(activo);
     }
 
-    public String getIdentificacion() {
+    public RUC getIdentificacion() {
         return identificacion;
-    }
-
-    public void setIdentificacion(String identificacion) {
-        this.identificacion = textoObligatorio(identificacion, "La identificacion no puede estar vacia");
     }
 
     public String getNombre() {
@@ -57,20 +65,19 @@ public class Cliente {
         this.telefono = textoOpcional(telefono, "El telefono no puede ser null");
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
-        String emailNormalizado = textoOpcional(email, "El email no puede ser null");
-        int arroba = emailNormalizado.lastIndexOf('@');
-        boolean dominioValido = arroba >= 1
-                && arroba < emailNormalizado.length() - 1
-                && emailNormalizado.substring(arroba + 1).contains(".");
-        if (!emailNormalizado.isEmpty() && !dominioValido) {
-            throw new IllegalArgumentException("El email no tiene un formato valido");
+        setEmail(new Email(email));
+    }
+
+    public void setEmail(Email email) {
+        if (email == null) {
+            throw new IllegalArgumentException("El email no puede ser null");
         }
-        this.email = emailNormalizado;
+        this.email = email;
     }
 
     public boolean isActivo() {
@@ -86,6 +93,22 @@ public class Cliente {
         String estado = activo ? "activo" : "inactivo";
         return "[" + identificacion + "] " + nombre + " - " + direccion + " - " + telefono + " - " + email + " - "
                 + estado;
+    }
+
+    @Override
+    public boolean equals(Object objeto) {
+        if (this == objeto) {
+            return true;
+        }
+        if (!(objeto instanceof Cliente otro)) {
+            return false;
+        }
+        return identificacion.equals(otro.identificacion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identificacion);
     }
 
     private static String textoObligatorio(String valor, String mensaje) {

@@ -1,13 +1,15 @@
 package com.univ2026.proformas.modelo;
 
+import com.univ2026.proformas.modelo.valor.Monto;
 import java.util.Locale;
+import java.util.Objects;
 
 /** Representa un producto generico del catalogo. */
 public class Producto {
-    private String codigo;
+    private final String codigo;
     private String nombre;
     private String descripcion;
-    private double precio;
+    private Monto precio;
     private double impuestoPct;
     private boolean activo;
 
@@ -19,7 +21,13 @@ public class Producto {
     /** Crea un producto y aplica las mismas validaciones que los setters. */
     public Producto(
             String codigo, String nombre, String descripcion, double precio, double impuestoPct, boolean activo) {
-        setCodigo(codigo);
+        this(codigo, nombre, descripcion, new Monto(precio), impuestoPct, activo);
+    }
+
+    /** Crea un producto con un precio representado como modelo de valor. */
+    public Producto(
+            String codigo, String nombre, String descripcion, Monto precio, double impuestoPct, boolean activo) {
+        this.codigo = textoObligatorio(codigo, "El codigo no puede estar vacio");
         setNombre(nombre);
         setDescripcion(descripcion);
         setPrecio(precio);
@@ -29,10 +37,6 @@ public class Producto {
 
     public String getCodigo() {
         return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = textoObligatorio(codigo, "El codigo no puede estar vacio");
     }
 
     public String getNombre() {
@@ -51,16 +55,17 @@ public class Producto {
         this.descripcion = textoOpcional(descripcion, "La descripcion no puede ser null");
     }
 
-    public double getPrecio() {
+    public Monto getPrecio() {
         return precio;
     }
 
     public void setPrecio(double precio) {
-        if (!Double.isFinite(precio)) {
-            throw new IllegalArgumentException("El precio debe ser un numero finito");
-        }
-        if (precio < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo");
+        setPrecio(new Monto(precio));
+    }
+
+    public void setPrecio(Monto precio) {
+        if (precio == null) {
+            throw new IllegalArgumentException("El precio no puede ser null");
         }
         this.precio = precio;
     }
@@ -91,7 +96,23 @@ public class Producto {
     public String resumen() {
         String estado = activo ? "activo" : "inactivo";
         return String.format(
-                Locale.US, "[%s] %s - $%.2f (impuesto %.1f%%) - %s", codigo, nombre, precio, impuestoPct, estado);
+                Locale.US, "[%s] %s - $%s (impuesto %.1f%%) - %s", codigo, nombre, precio, impuestoPct, estado);
+    }
+
+    @Override
+    public boolean equals(Object objeto) {
+        if (this == objeto) {
+            return true;
+        }
+        if (!(objeto instanceof Producto otro)) {
+            return false;
+        }
+        return codigo.equals(otro.codigo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigo);
     }
 
     private static String textoObligatorio(String valor, String mensaje) {

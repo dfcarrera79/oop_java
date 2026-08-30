@@ -64,7 +64,7 @@ public class ItemProforma {
         if (!producto.isActivo()) {
             throw new IllegalStateException("No se puede calcular un producto inactivo");
         }
-        double precioConDescuento = producto.getPrecio() * (1 - descuentoPct / 100);
+        double precioConDescuento = producto.getPrecio().doubleValue() * (1 - descuentoPct / 100);
         double subtotal = precioConDescuento * cantidad;
         if (!Double.isFinite(subtotal)) {
             throw new IllegalStateException("El subtotal excede el rango permitido");

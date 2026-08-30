@@ -42,4 +42,3 @@ public class ProductoDigital extends Producto {
         return super.resumen() + String.format(Locale.US, " - digital: %.2f MB", tamanioMb);
     }
 }
-
