@@ -88,13 +88,6 @@ public class Cliente {
         this.activo = activo;
     }
 
-    /** Retorna una representacion legible sin imprimirla. */
-    public String resumen() {
-        String estado = activo ? "activo" : "inactivo";
-        return "[" + identificacion + "] " + nombre + " - " + direccion + " - " + telefono + " - " + email + " - "
-                + estado;
-    }
-
     @Override
     public boolean equals(Object objeto) {
         if (this == objeto) {

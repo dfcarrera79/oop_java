@@ -1,7 +1,6 @@
 package com.univ2026.proformas.modelo;
 
 import com.univ2026.proformas.modelo.valor.Monto;
-import java.util.Locale;
 import java.util.Objects;
 
 /** Representa un producto generico del catalogo. */
@@ -90,13 +89,6 @@ public class Producto {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }
-
-    /** Retorna una representacion legible sin imprimirla. */
-    public String resumen() {
-        String estado = activo ? "activo" : "inactivo";
-        return String.format(
-                Locale.US, "[%s] %s - $%s (impuesto %.1f%%) - %s", codigo, nombre, precio, impuestoPct, estado);
     }
 
     @Override

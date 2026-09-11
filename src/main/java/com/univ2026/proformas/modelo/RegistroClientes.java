@@ -1,6 +1,7 @@
 package com.univ2026.proformas.modelo;
 
 import com.univ2026.proformas.modelo.valor.RUC;
+import java.util.List;
 
 /** Contrato para registrar y buscar clientes por su identidad. */
 public interface RegistroClientes {
@@ -14,4 +15,7 @@ public interface RegistroClientes {
     default Cliente buscar(String identificacion) {
         return buscar(new RUC(identificacion));
     }
+
+    /** Retorna los clientes registrados sin exponer la coleccion interna. */
+    List<Cliente> listar();
 }

@@ -2,7 +2,6 @@ package com.univ2026.proformas.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** Agrupa los items cotizados para un cliente. */
 public class Proforma {
@@ -64,18 +63,5 @@ public class Proforma {
 
     public double calcularTotal() {
         return items.stream().mapToDouble(ItemProforma::calcularTotal).sum();
-    }
-
-    /** Retorna un encabezado con los totales sin imprimirlo. */
-    public String resumen() {
-        String unidad = items.size() == 1 ? "item" : "items";
-        return String.format(
-                Locale.US,
-                "Proforma %s - %s - %d %s - $%.2f",
-                numero,
-                cliente.getNombre(),
-                items.size(),
-                unidad,
-                calcularTotal());
     }
 }

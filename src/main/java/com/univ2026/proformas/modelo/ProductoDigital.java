@@ -1,7 +1,5 @@
 package com.univ2026.proformas.modelo;
 
-import java.util.Locale;
-
 /** Representa un producto descargable cuyo tamanio se expresa en megabytes. */
 public class ProductoDigital extends Producto {
     private double tamanioMb;
@@ -34,11 +32,5 @@ public class ProductoDigital extends Producto {
             throw new IllegalArgumentException("El tamanio debe ser un numero positivo y finito");
         }
         this.tamanioMb = tamanioMb;
-    }
-
-    /** Agrega el tamanio a la representacion heredada. */
-    @Override
-    public String resumen() {
-        return super.resumen() + String.format(Locale.US, " - digital: %.2f MB", tamanioMb);
     }
 }

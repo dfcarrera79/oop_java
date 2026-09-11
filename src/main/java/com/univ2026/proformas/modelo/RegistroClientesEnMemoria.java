@@ -2,6 +2,7 @@ package com.univ2026.proformas.modelo;
 
 import com.univ2026.proformas.modelo.valor.RUC;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Registro de clientes con unicidad por identificacion. */
@@ -26,5 +27,10 @@ public class RegistroClientesEnMemoria implements RegistroClientes {
             throw new IllegalArgumentException("La identificacion no puede ser null");
         }
         return clientes.get(identificacion);
+    }
+
+    @Override
+    public List<Cliente> listar() {
+        return List.copyOf(clientes.values());
     }
 }

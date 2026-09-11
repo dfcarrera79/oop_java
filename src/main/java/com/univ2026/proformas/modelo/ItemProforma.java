@@ -1,7 +1,5 @@
 package com.univ2026.proformas.modelo;
 
-import java.util.Locale;
-
 /** Representa una linea calculable dentro de una proforma. */
 public class ItemProforma {
     private Producto producto;
@@ -80,18 +78,5 @@ public class ItemProforma {
     /** Calcula el valor final de la linea. */
     public double calcularTotal() {
         return calcularSubtotal() + calcularImpuesto();
-    }
-
-    /** Retorna una representacion legible sin imprimirla. */
-    public String resumen() {
-        return String.format(
-                Locale.US,
-                "%d x %s - descuento %.1f%% - subtotal $%.2f - impuesto $%.2f - total $%.2f",
-                cantidad,
-                producto.getNombre(),
-                descuentoPct,
-                calcularSubtotal(),
-                calcularImpuesto(),
-                calcularTotal());
     }
 }

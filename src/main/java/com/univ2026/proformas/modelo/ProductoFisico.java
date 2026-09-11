@@ -1,7 +1,5 @@
 package com.univ2026.proformas.modelo;
 
-import java.util.Locale;
-
 /** Representa un producto tangible cuyo peso se expresa en kilogramos. */
 public class ProductoFisico extends Producto {
     private double pesoKg;
@@ -34,11 +32,5 @@ public class ProductoFisico extends Producto {
             throw new IllegalArgumentException("El peso debe ser un numero positivo y finito");
         }
         this.pesoKg = pesoKg;
-    }
-
-    /** Agrega el peso a la representacion heredada. */
-    @Override
-    public String resumen() {
-        return super.resumen() + String.format(Locale.US, " - fisico: %.2f kg", pesoKg);
     }
 }
