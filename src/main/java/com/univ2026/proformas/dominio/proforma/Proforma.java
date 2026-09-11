@@ -1,10 +1,9 @@
-package com.univ2026.proformas.modelo;
+package com.univ2026.proformas.dominio.proforma;
 
-import com.univ2026.proformas.modelo.Cliente;
-import com.univ2026.proformas.modelo.ItemProforma;
+import com.univ2026.proformas.dominio.Estado;
+import com.univ2026.proformas.dominio.cliente.Cliente;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** Agrupa los items cotizados para un cliente. */
 public class Proforma {
@@ -50,7 +49,7 @@ public class Proforma {
         if (item == null) {
             throw new IllegalArgumentException("El item no puede ser null");
         }
-        if (!item.getProducto().isActivo()) {
+        if (item.getProducto().getEstado() != Estado.ACTIVO) {
             throw new IllegalArgumentException("El producto debe estar activo");
         }
         items.add(item);
@@ -66,18 +65,5 @@ public class Proforma {
 
     public double calcularTotal() {
         return items.stream().mapToDouble(ItemProforma::calcularTotal).sum();
-    }
-
-    /** Retorna un encabezado con los totales sin imprimirlo. */
-    public String resumen() {
-        String unidad = items.size() == 1 ? "item" : "items";
-        return String.format(
-                Locale.US,
-                "Proforma %s - %s - %d %s - $%.2f",
-                numero,
-                cliente.getNombre(),
-                items.size(),
-                unidad,
-                calcularTotal());
     }
 }

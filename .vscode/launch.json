@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Ejecutar Menú Consola (Main)",
+            "request": "launch",
+            "mainClass": "com.univ2026.proformas.Main",
+            "console": "integratedTerminal",
+            "javaExec": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64/bin/java"
+        },
+        {
+            "type": "java",
+            "name": "Ejecutar Demostración (Main --demo)",
+            "request": "launch",
+            "mainClass": "com.univ2026.proformas.Main",
+            "args": ["--demo"],
+            "console": "integratedTerminal",
+            "javaExec": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64/bin/java"
+        },
+        {
+            "type": "java",
+            "name": "Ejecutar Ejemplos Arreglos (arreglos)",
+            "request": "launch",
+            "mainClass": "com.univ2026.proformas.arreglos",
+            "console": "integratedTerminal",
+            "javaExec": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64/bin/java"
+        }
+    ]
+}
