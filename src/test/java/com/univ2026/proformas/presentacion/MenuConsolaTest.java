@@ -2,15 +2,22 @@ package com.univ2026.proformas.presentacion;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.univ2026.proformas.AplicacionProformas;
+import com.univ2026.proformas.aplicacion.AplicacionProformas;
+import com.univ2026.proformas.persistencia.sqlite.CatalogoProductosSQLite;
+import com.univ2026.proformas.persistencia.sqlite.RegistroClientesSQLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Scanner;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class MenuConsolaTest {
+    @TempDir
+    Path temporal;
+
     @Test
     void ejecutaAltasListadosBajasYDemo() {
         String entradas = String.join(
@@ -19,8 +26,10 @@ class MenuConsolaTest {
                 "P-002",
                 "Mouse",
                 "10",
-                "0",
+                "15",
+                "",
                 "4",
+                "1",
                 "1100005678",
                 "Luis",
                 "luis@correo.com",
@@ -31,6 +40,10 @@ class MenuConsolaTest {
                 "P-002",
                 "6",
                 "1100005678",
+                "8",
+                "Mouse",
+                "9",
+                "LUIS@CORREO",
                 "0");
 
         String texto = ejecutarMenu(entradas);
@@ -39,7 +52,7 @@ class MenuConsolaTest {
         assertTrue(texto.contains("Cliente registrado."));
         assertTrue(texto.contains("[P-002] Mouse"));
         assertTrue(texto.contains("[1100005678] Luis"));
-        assertTrue(texto.contains("Proforma DEMO-001 - Luis - 1 item - $10.00"));
+        assertTrue(texto.contains("Proforma DEMO-001 - Luis - 1 item - $9.78"));
         assertTrue(texto.contains("Producto dado de baja: Mouse."));
         assertTrue(texto.contains("Cliente dado de baja: Luis."));
         assertTrue(texto.trim().endsWith("Hasta pronto."));
@@ -47,7 +60,7 @@ class MenuConsolaTest {
 
     @Test
     void informaOpcionesYDatosInvalidos() {
-        String entradas = String.join(System.lineSeparator(), "99", "1", "", "Mouse", "10", "0", "0");
+        String entradas = String.join(System.lineSeparator(), "99", "1", "", "Mouse", "10", "15", "", "0");
 
         String texto = ejecutarMenu(entradas);
 
@@ -60,12 +73,15 @@ class MenuConsolaTest {
         assertTrue(ejecutarMenu("").trim().endsWith("Sesion finalizada."));
     }
 
-    private static String ejecutarMenu(String entradas) {
+    private String ejecutarMenu(String entradas) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         Scanner scanner = new Scanner(new ByteArrayInputStream(entradas.getBytes(StandardCharsets.UTF_8)));
         PrintStream salida = new PrintStream(bytes, true, StandardCharsets.UTF_8);
 
-        new MenuConsola(new AplicacionProformas(), scanner, salida).ejecutar();
+        Path base = temporal.resolve("menu.db");
+        AplicacionProformas aplicacion =
+                new AplicacionProformas(new CatalogoProductosSQLite(base), new RegistroClientesSQLite(base));
+        new MenuConsola(aplicacion, scanner, salida).ejecutar();
         return bytes.toString(StandardCharsets.UTF_8);
     }
 }

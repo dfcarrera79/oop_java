@@ -1,7 +1,7 @@
 package com.univ2026.proformas.presentacion;
 
-import com.univ2026.proformas.modelo.ItemProforma;
-import com.univ2026.proformas.modelo.Proforma;
+import com.univ2026.proformas.dominio.proforma.ItemProforma;
+import com.univ2026.proformas.dominio.proforma.Proforma;
 import java.util.Locale;
 
 /** Convierte proformas a texto sin producir salida. */
@@ -33,7 +33,7 @@ public final class FormateadorProforma {
         }
         texto.append(String.format(
                 Locale.US,
-                "%nSubtotal: $%.2f%nImpuesto: $%.2f%nTotal: $%.2f",
+                "%nSubtotal: $%.2f%nIVA: $%.2f%nTotal: $%.2f",
                 proforma.calcularSubtotal(),
                 proforma.calcularImpuesto(),
                 proforma.calcularTotal()));
