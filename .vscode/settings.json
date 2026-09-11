@@ -1,0 +1,15 @@
+{
+    "java.jdt.ls.java.home": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64",
+            "default": true
+        },
+        {
+            "name": "JavaSE-17",
+            "path": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64"
+        }
+    ],
+    "java.debug.settings.console": "integratedTerminal"
+}
