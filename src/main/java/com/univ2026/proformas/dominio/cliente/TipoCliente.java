@@ -1,5 +1,7 @@
 package com.univ2026.proformas.dominio.cliente;
 
+import java.math.BigDecimal;
+
 /** Categoria comercial del cliente y descuento que le corresponde. */
 public enum TipoCliente {
     PUBLICO("publico", 15.0),
@@ -20,5 +22,9 @@ public enum TipoCliente {
 
     public double getDescuentoPct() {
         return descuentoPct;
+    }
+
+    public BigDecimal getDescuento() {
+        return BigDecimal.valueOf(descuentoPct);
     }
 }

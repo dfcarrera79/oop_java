@@ -58,9 +58,10 @@ class CatalogosSQLiteTest {
     @Test
     void rechazaCodigosDuplicadosYRetornaResultadosVacios() {
         CatalogoProductosSQLite catalogo = catalogoProductos();
-        catalogo.registrar(new Producto("P-001", "Teclado"));
+        catalogo.registrar(new Producto(" p-001 ", "Teclado"));
 
-        assertThrows(IllegalArgumentException.class, () -> catalogo.registrar(new Producto("P-001", "Otro")));
+        assertThrows(IllegalArgumentException.class, () -> catalogo.registrar(new Producto("p-001", "Otro")));
+        assertEquals("Teclado", catalogo.buscarPorCodigo(" p-001 ").getNombre());
         assertNull(catalogo.buscarPorCodigo("P-999"));
         assertTrue(catalogo.buscar("inexistente").isEmpty());
     }
@@ -121,7 +122,7 @@ class CatalogosSQLiteTest {
         assertEquals(TipoCliente.MAYORISTA, recuperado.getTipo());
         assertEquals(
                 "1790012345001",
-                reabierto.buscar("VENTAS@CLINICA").get(0).getIdentificacion().valor());
+                reabierto.buscar("CENTRAL").get(0).getIdentificacion().valor());
         assertThrows(IllegalArgumentException.class, () -> reabierto.registrar(cliente));
     }
 
@@ -142,6 +143,19 @@ class CatalogosSQLiteTest {
                 new RegistroClientesSQLite(base)
                         .buscarPorIdentificacion("1100001234")
                         .getEstado());
+    }
+
+    @Test
+    void buscaIdentificacionPorPrefijoYNombrePorFragmentoSinElegirImplicitamente() {
+        RegistroClientesSQLite registro = new RegistroClientesSQLite(temporal.resolve("busqueda-clientes.db"));
+        registro.registrar(new Cliente("1104747629001", "Clinica Norte"));
+        registro.registrar(new Cliente("1104747629002", "Clinica Sur"));
+        registro.registrar(new Cliente("1790012345001", "Otra Clinica"));
+
+        assertEquals(2, registro.buscar("1104747629").size());
+        assertEquals(3, registro.buscar("CLINICA").size());
+        assertTrue(registro.buscar("4747629").isEmpty());
+        assertTrue(registro.buscar("%").isEmpty());
     }
 
     @Test

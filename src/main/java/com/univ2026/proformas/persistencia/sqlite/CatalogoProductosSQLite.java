@@ -29,6 +29,10 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
         super(archivoBaseDatos);
     }
 
+    public CatalogoProductosSQLite(BaseDatosSQLite baseDatos) {
+        super(baseDatos);
+    }
+
     @Override
     public void registrar(Producto producto) {
         if (producto == null) {
@@ -41,7 +45,7 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
             sentencia.setString(2, producto.getNombre());
             sentencia.setString(3, producto.getDescripcion());
             sentencia.setString(4, producto.getPrecio().toString());
-            sentencia.setDouble(5, producto.getIvaPct());
+            sentencia.setInt(5, producto.getIvaPct());
             sentencia.setString(6, producto.getEstado().name());
             asignarAtributos(sentencia, producto.getExtras());
             sentencia.executeUpdate();
@@ -54,8 +58,47 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
     }
 
     @Override
+    public Producto actualizar(Producto producto) {
+        if (producto == null) {
+            throw new IllegalArgumentException("El producto no puede ser null");
+        }
+        String sql = "UPDATE productos SET nombre = ?, descripcion = ?, precio = ?, iva_pct = ?, estado = ?,"
+                + " tipo_atributos = ?, peso_kg = ?, talla = ?, tamanio_mb = ? WHERE codigo = ?";
+        try (Connection conexion = abrirConexion();
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, producto.getNombre());
+            sentencia.setString(2, producto.getDescripcion());
+            sentencia.setString(3, producto.getPrecio().toString());
+            sentencia.setInt(4, producto.getIvaPct());
+            sentencia.setString(5, producto.getEstado().name());
+            asignarAtributos(sentencia, producto.getExtras(), 6);
+            sentencia.setString(10, producto.getCodigo());
+            if (sentencia.executeUpdate() == 0) {
+                throw new IllegalArgumentException("No existe el producto " + producto.getCodigo());
+            }
+            return buscarPorCodigo(producto.getCodigo());
+        } catch (SQLException error) {
+            throw new IllegalStateException("No se pudo actualizar el producto", error);
+        }
+    }
+
+    @Override
+    public void eliminar(String codigo) {
+        String normalizado = Producto.normalizarCodigo(codigo);
+        try (Connection conexion = abrirConexion();
+                PreparedStatement sentencia = conexion.prepareStatement("DELETE FROM productos WHERE codigo = ?")) {
+            sentencia.setString(1, normalizado);
+            if (sentencia.executeUpdate() == 0) {
+                throw new IllegalArgumentException("No existe el producto " + normalizado);
+            }
+        } catch (SQLException error) {
+            throw new IllegalStateException("No se pudo eliminar el producto", error);
+        }
+    }
+
+    @Override
     public Producto buscarPorCodigo(String codigo) {
-        String normalizado = textoObligatorio(codigo, "El codigo no puede estar vacio");
+        String normalizado = Producto.normalizarCodigo(codigo);
         List<Producto> resultados = consultarLista(
                 "SELECT " + COLUMNAS + " FROM productos WHERE codigo = ?",
                 sentencia -> sentencia.setString(1, normalizado));
@@ -69,11 +112,12 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
 
     @Override
     public List<Producto> buscar(String texto) {
-        String patron = "%" + (texto == null ? "" : texto.trim()) + "%";
+        String patron = patronLike(texto, false);
         return consultarLista(
                 "SELECT " + COLUMNAS
-                        + " FROM productos WHERE codigo LIKE ? COLLATE NOCASE OR nombre LIKE ? COLLATE NOCASE"
-                        + " OR descripcion LIKE ? COLLATE NOCASE ORDER BY codigo",
+                        + " FROM productos WHERE codigo LIKE ? ESCAPE '\\' COLLATE NOCASE"
+                        + " OR nombre LIKE ? ESCAPE '\\' COLLATE NOCASE"
+                        + " OR descripcion LIKE ? ESCAPE '\\' COLLATE NOCASE ORDER BY codigo",
                 sentencia -> {
                     sentencia.setString(1, patron);
                     sentencia.setString(2, patron);
@@ -86,7 +130,7 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
         if (estado == null) {
             throw new IllegalArgumentException("El estado no puede ser null");
         }
-        String normalizado = textoObligatorio(codigo, "El codigo no puede estar vacio");
+        String normalizado = Producto.normalizarCodigo(codigo);
         try (Connection conexion = abrirConexion();
                 PreparedStatement sentencia =
                         conexion.prepareStatement("UPDATE productos SET estado = ? WHERE codigo = ?")) {
@@ -128,25 +172,30 @@ public final class CatalogoProductosSQLite extends ColeccionSQLite<Producto> imp
     }
 
     private static void asignarAtributos(PreparedStatement sentencia, AtributosProducto atributos) throws SQLException {
+        asignarAtributos(sentencia, atributos, 7);
+    }
+
+    private static void asignarAtributos(PreparedStatement sentencia, AtributosProducto atributos, int inicio)
+            throws SQLException {
         if (atributos instanceof AtributosFisicos fisicos) {
-            sentencia.setString(7, "FISICO");
-            sentencia.setDouble(8, fisicos.pesoKg());
+            sentencia.setString(inicio, "FISICO");
+            sentencia.setDouble(inicio + 1, fisicos.pesoKg());
             if (fisicos.talla() == null) {
-                sentencia.setNull(9, Types.VARCHAR);
+                sentencia.setNull(inicio + 2, Types.VARCHAR);
             } else {
-                sentencia.setString(9, fisicos.talla().name());
+                sentencia.setString(inicio + 2, fisicos.talla().name());
             }
-            sentencia.setNull(10, Types.REAL);
+            sentencia.setNull(inicio + 3, Types.REAL);
         } else if (atributos instanceof AtributosDigitales digitales) {
-            sentencia.setString(7, "DIGITAL");
-            sentencia.setNull(8, Types.REAL);
-            sentencia.setNull(9, Types.VARCHAR);
-            sentencia.setDouble(10, digitales.tamanioMb());
+            sentencia.setString(inicio, "DIGITAL");
+            sentencia.setNull(inicio + 1, Types.REAL);
+            sentencia.setNull(inicio + 2, Types.VARCHAR);
+            sentencia.setDouble(inicio + 3, digitales.tamanioMb());
         } else {
-            sentencia.setNull(7, Types.VARCHAR);
-            sentencia.setNull(8, Types.REAL);
-            sentencia.setNull(9, Types.VARCHAR);
-            sentencia.setNull(10, Types.REAL);
+            sentencia.setNull(inicio, Types.VARCHAR);
+            sentencia.setNull(inicio + 1, Types.REAL);
+            sentencia.setNull(inicio + 2, Types.VARCHAR);
+            sentencia.setNull(inicio + 3, Types.REAL);
         }
     }
 

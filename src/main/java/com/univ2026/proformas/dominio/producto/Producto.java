@@ -2,6 +2,7 @@ package com.univ2026.proformas.dominio.producto;
 
 import com.univ2026.proformas.dominio.Estado;
 import com.univ2026.proformas.dominio.valor.Monto;
+import java.util.Locale;
 import java.util.Objects;
 
 /** Representa un producto generico del catalogo. */
@@ -10,7 +11,7 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private Monto precio;
-    private double ivaPct;
+    private int ivaPct;
     private Estado estado;
     private AtributosProducto extras;
 
@@ -40,7 +41,7 @@ public class Producto {
             double ivaPct,
             Estado estado,
             AtributosProducto extras) {
-        this.codigo = textoObligatorio(codigo, "El codigo no puede estar vacio");
+        this.codigo = normalizarCodigo(codigo);
         setNombre(nombre);
         setDescripcion(descripcion);
         setPrecio(precio);
@@ -84,18 +85,12 @@ public class Producto {
         this.precio = precio;
     }
 
-    public double getIvaPct() {
+    public int getIvaPct() {
         return ivaPct;
     }
 
     public void setIvaPct(double ivaPct) {
-        if (!Double.isFinite(ivaPct)) {
-            throw new IllegalArgumentException("El IVA debe ser un numero finito");
-        }
-        if (ivaPct < 0 || ivaPct > 100) {
-            throw new IllegalArgumentException("El IVA debe estar entre 0 y 100");
-        }
-        this.ivaPct = ivaPct;
+        this.ivaPct = TarifasIva.validar(ivaPct);
     }
 
     public Estado getEstado() {
@@ -138,6 +133,10 @@ public class Producto {
             throw new IllegalArgumentException(mensaje);
         }
         return valor.trim();
+    }
+
+    public static String normalizarCodigo(String codigo) {
+        return textoObligatorio(codigo, "El codigo no puede estar vacio").toUpperCase(Locale.ROOT);
     }
 
     private static String textoOpcional(String valor, String mensaje) {

@@ -1,10 +1,7 @@
 package com.univ2026.proformas.persistencia.sqlite;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,20 +10,21 @@ import java.util.List;
 
 /** Operaciones JDBC compartidas para colecciones tipadas respaldadas por SQLite. */
 public abstract class ColeccionSQLite<T> {
-    private final String urlConexion;
+    private final BaseDatosSQLite baseDatos;
 
     protected ColeccionSQLite(Path archivoBaseDatos) {
-        if (archivoBaseDatos == null) {
-            throw new IllegalArgumentException("El archivo de base de datos no puede ser null");
+        this(new BaseDatosSQLite(archivoBaseDatos));
+    }
+
+    protected ColeccionSQLite(BaseDatosSQLite baseDatos) {
+        if (baseDatos == null) {
+            throw new IllegalArgumentException("La base de datos no puede ser null");
         }
-        Path archivoAbsoluto = archivoBaseDatos.toAbsolutePath();
-        crearDirectorio(archivoAbsoluto.getParent());
-        urlConexion = "jdbc:sqlite:" + archivoAbsoluto;
-        InicializadorEsquema.inicializar(urlConexion);
+        this.baseDatos = baseDatos;
     }
 
     protected final Connection abrirConexion() throws SQLException {
-        return DriverManager.getConnection(urlConexion);
+        return baseDatos.abrirConexion();
     }
 
     protected final List<T> consultarLista(String sql, PreparadorSQL preparador) {
@@ -54,14 +52,9 @@ public abstract class ColeccionSQLite<T> {
         return valor.trim();
     }
 
-    private static void crearDirectorio(Path directorio) {
-        if (directorio == null) {
-            return;
-        }
-        try {
-            Files.createDirectories(directorio);
-        } catch (IOException error) {
-            throw new IllegalStateException("No se pudo crear el directorio de la base de datos", error);
-        }
+    protected static String patronLike(String texto, boolean prefijo) {
+        String valor = texto == null ? "" : texto.trim();
+        valor = valor.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return prefijo ? valor + "%" : "%" + valor + "%";
     }
 }

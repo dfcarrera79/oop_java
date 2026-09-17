@@ -9,6 +9,10 @@ import java.util.Set;
 public interface CatalogoProductos {
     void registrar(Producto producto);
 
+    Producto actualizar(Producto producto);
+
+    void eliminar(String codigo);
+
     Producto buscarPorCodigo(String codigo);
 
     List<Producto> listar();
