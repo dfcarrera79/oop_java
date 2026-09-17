@@ -1,5 +1,7 @@
 {
     "java.jdt.ls.java.home": "/home/dfcarrera/.antigravity-ide/extensions/redhat.java-1.56.0-linux-x64/jre/21.0.12.1-linux-x86_64",
+    "java.import.maven.enabled": true,
+    "java.configuration.updateBuildConfiguration": "automatic",
     "java.configuration.runtimes": [
         {
             "name": "JavaSE-21",

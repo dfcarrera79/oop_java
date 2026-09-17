@@ -26,6 +26,26 @@ En Windows:
 mvnw.cmd javafx:run
 ```
 
+## Ejecutar desde Antigravity IDE
+
+Abra en Antigravity IDE la carpeta completa del proyecto:
+
+```text
+/home/dfcarrera/Documents/Lectures/oop_java
+```
+
+Si la opcion **Run Java** de `Main.java` no reconoce JavaFX, vuelva a importar
+el proyecto Maven:
+
+1. Presione `Ctrl+Shift+P` para abrir la paleta de comandos de Antigravity.
+2. Escriba y seleccione `Java: Clean Java Language Server Workspace`.
+3. Confirme la opcion **Restart and delete**.
+4. Espere a que Maven termine de importar las dependencias.
+5. Haga clic derecho en `Main.java` y seleccione **Run Java**.
+
+`Java: Clean Java Language Server Workspace` es una accion de la paleta de
+Antigravity, no un comando para ejecutar en Bash.
+
 La base de datos se crea automaticamente en `data/proformas.db`. Para usar otra
 ruta:
 
