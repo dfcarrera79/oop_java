@@ -15,7 +15,7 @@ class ProductoTest {
         assertEquals("P-001", producto.getCodigo());
         assertEquals("Faja", producto.getNombre());
         assertEquals(new Monto("0.00"), producto.getPrecio());
-        assertEquals(15.0, producto.getIvaPct());
+        assertEquals(15, producto.getIvaPct());
         assertEquals(Estado.ACTIVO, producto.getEstado());
         assertNull(producto.getExtras());
     }
@@ -24,13 +24,18 @@ class ProductoTest {
     void validaPropiedadesMedianteSetters() {
         Producto producto = new Producto("P-002", "Faja");
         producto.setPrecio(85.0);
-        producto.setIvaPct(12.0);
+        producto.setIvaPct(0.0);
         producto.setEstado(Estado.INACTIVO);
         assertEquals(new Monto("85.00"), producto.getPrecio());
-        assertEquals(12.0, producto.getIvaPct());
+        assertEquals(0, producto.getIvaPct());
         assertEquals(Estado.INACTIVO, producto.getEstado());
-        assertThrows(IllegalArgumentException.class, () -> producto.setIvaPct(101.0));
+        assertThrows(IllegalArgumentException.class, () -> producto.setIvaPct(12.0));
         assertThrows(IllegalArgumentException.class, () -> producto.setEstado(null));
+    }
+
+    @Test
+    void normalizaCodigoConLocaleRaiz() {
+        assertEquals("PRO-I", new Producto("  pro-i  ", "Faja").getCodigo());
     }
 
     @Test

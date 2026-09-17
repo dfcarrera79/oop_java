@@ -74,4 +74,11 @@ class ModelosValorTest {
                 assertThrows(IllegalArgumentException.class, () -> new Monto(Double.POSITIVE_INFINITY))
                         .getMessage());
     }
+
+    @Test
+    void conviertePrecioCapturadoConOSinIvaAPrecioBase() {
+        assertEquals(new BigDecimal("10.00"), Monto.convertirAPrecioBase(new BigDecimal("11.50"), 15, true));
+        assertEquals(new BigDecimal("11.50"), Monto.convertirAPrecioBase(new BigDecimal("11.50"), 15, false));
+        assertEquals(new BigDecimal("11.50"), Monto.convertirAPrecioBase(new BigDecimal("11.50"), 0, true));
+    }
 }

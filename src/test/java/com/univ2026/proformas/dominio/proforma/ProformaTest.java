@@ -6,88 +6,63 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.univ2026.proformas.dominio.Estado;
 import com.univ2026.proformas.dominio.cliente.Cliente;
-import com.univ2026.proformas.dominio.cliente.TipoCliente;
 import com.univ2026.proformas.dominio.producto.Producto;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 class ProformaTest {
     @Test
-    void agregaItemsYAcumulaTotales() {
+    void administraItemsDatosYTotalesDecimales() {
         Cliente cliente = new Cliente("1100000001", "Ana");
-        Producto productoUno = new Producto("P-001", "Teclado", "", 100.0, 12.0, Estado.ACTIVO, null);
-        Producto productoDos = new Producto("P-002", "Mouse", "", 25.0, 0.0, Estado.ACTIVO, null);
-        Proforma proforma = new Proforma("PRO-001", cliente);
-        ItemProforma item = new ItemProforma(productoUno, 2, TipoCliente.PUBLICO);
+        Proforma proforma = new Proforma(cliente, LocalDate.of(2026, 9, 13), " Nota ", " Banco ");
+        proforma.agregarItem(new ItemProforma(producto("P-001", 10, 15), 2));
+        proforma.agregarItem(new ItemProforma(producto("P-002", 5, 0), 1));
 
-        proforma.agregarItem(item);
-        proforma.agregarItem(new ItemProforma(productoDos, 1));
-
-        assertEquals(item, proforma.getItems().get(0));
-        assertEquals(195.0, proforma.calcularSubtotal(), 0.001);
-        assertEquals(20.4, proforma.calcularImpuesto(), 0.001);
-        assertEquals(215.4, proforma.calcularTotal(), 0.001);
-        assertEquals(2, proforma.getItems().size());
+        assertEquals(new BigDecimal("25.00"), proforma.calcularSubtotal());
+        assertEquals(new BigDecimal("3.00"), proforma.calcularImpuesto());
+        assertEquals(new BigDecimal("28.00"), proforma.calcularTotal());
+        assertEquals("Nota", proforma.getObservaciones());
+        assertEquals("Banco", proforma.getInstruccionesPago());
+        assertEquals("P-001", proforma.quitarItem(0).getProducto().getCodigo());
+        assertEquals(1, proforma.getItems().size());
     }
 
     @Test
-    void iniciaSinItemsYConTotalesEnCero() {
-        Proforma proforma = new Proforma("PRO-002", new Cliente("1100000002", "Luis"));
-
+    void exigeClienteFechaYProtegeLista() {
+        assertThrows(IllegalArgumentException.class, () -> new Proforma(null, LocalDate.now(), "", ""));
+        assertThrows(
+                IllegalArgumentException.class, () -> new Proforma(new Cliente("1100000002", "Luis"), null, "", ""));
+        Proforma proforma = new Proforma(new Cliente("1100000002", "Luis"), LocalDate.now(), "", "");
         assertTrue(proforma.getItems().isEmpty());
-        assertEquals(0.0, proforma.calcularTotal());
-    }
-
-    @Test
-    void noPermiteModificarLaListaDesdeElExterior() {
-        Proforma proforma = new Proforma("PRO-003", new Cliente("1100000003", "Maria"));
-        List<ItemProforma> items = proforma.getItems();
-
-        assertThrows(UnsupportedOperationException.class, () -> items.add(null));
-    }
-
-    @Test
-    void rechazaClienteNullYConservaElClienteActual() {
-        Cliente cliente = new Cliente("1100000004", "Carlos");
-        Proforma proforma = new Proforma("PRO-004", cliente);
-
-        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> proforma.setCliente(null));
-
-        assertEquals("El cliente no puede ser null", error.getMessage());
-        assertEquals(cliente, proforma.getCliente());
-    }
-
-    @Test
-    void validaYNormalizaNumeroAlCrearYAsignar() {
-        Proforma proforma = new Proforma("  PRO-005  ", new Cliente("1100000005", "Sofia"));
-
-        assertEquals("PRO-005", proforma.getNumero());
-        assertThrows(IllegalArgumentException.class, () -> proforma.setNumero(" "));
-        assertEquals("PRO-005", proforma.getNumero());
-        assertThrows(IllegalArgumentException.class, () -> new Proforma(null, new Cliente("1100000006", "Elena")));
-    }
-
-    @Test
-    void agregarItemRechazaNullYProductoDesactivado() {
-        Proforma proforma = new Proforma("PRO-006", new Cliente("1100000007", "Sofia"));
-        Producto activo = new Producto("P-003", "Mouse");
-        ItemProforma item = new ItemProforma(activo, 1);
-        activo.setEstado(Estado.INACTIVO);
-
+        assertThrows(
+                UnsupportedOperationException.class, () -> proforma.getItems().add(null));
         assertThrows(IllegalArgumentException.class, () -> proforma.agregarItem(null));
-        assertThrows(IllegalArgumentException.class, () -> proforma.agregarItem(item));
-        assertTrue(proforma.getItems().isEmpty());
     }
 
     @Test
-    void cadaProformaPoseeSuPropiaListaDeItems() {
-        Cliente cliente = new Cliente("1100000008", "Eva");
-        Proforma primera = new Proforma("PRO-007", cliente);
-        Proforma segunda = new Proforma("PRO-008", cliente);
+    void normalizaNumeroYNoPermiteCambiarlo() {
+        Proforma proforma = new Proforma("  PRO-000001  ", new Cliente("1100000003", "Maria"));
 
-        primera.agregarItem(new ItemProforma(new Producto("P-004", "Manual"), 1));
+        assertEquals("PRO-000001", proforma.getNumero());
+        assertThrows(IllegalStateException.class, () -> proforma.asignarNumero("PRO-000002"));
+        assertThrows(IllegalArgumentException.class, () -> proforma.asignarNumero(" "));
+    }
+
+    @Test
+    void cadaDocumentoTieneSuListaYSnapshotDeCliente() {
+        Cliente cliente = new Cliente("1100000004", "Original");
+        Proforma primera = new Proforma(cliente, LocalDate.now(), "", "");
+        Proforma segunda = new Proforma(cliente, LocalDate.now(), "", "");
+        primera.agregarItem(new ItemProforma(producto("P-003", 10, 0), 1));
+        cliente.setNombre("Modificado");
 
         assertEquals(1, primera.getItems().size());
         assertTrue(segunda.getItems().isEmpty());
+        assertEquals("Original", primera.getCliente().getNombre());
+    }
+
+    private static Producto producto(String codigo, double precio, int iva) {
+        return new Producto(codigo, "Producto", "", precio, iva, Estado.ACTIVO, null);
     }
 }

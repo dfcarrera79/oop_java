@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class AbstraccionTest {
     @Test
     void productoYClienteUsanModelosDeValor() {
-        Producto producto = new Producto("P-001", "Mouse", "", new Monto("25.50"), 12.0, Estado.ACTIVO, null);
+        Producto producto = new Producto("P-001", "Mouse", "", new Monto("25.50"), 15.0, Estado.ACTIVO, null);
         Cliente cliente = new Cliente(
                 new RUC("1100001234"),
                 "Ana",
@@ -33,7 +33,7 @@ class AbstraccionTest {
     @Test
     void entidadesComparanPorIdentidadLogica() {
         Producto primero = new Producto("P-001", "Mouse", "", 10.0, 0.0, Estado.ACTIVO, null);
-        Producto segundo = new Producto("P-001", "Otro nombre", "", 99.0, 12.0, Estado.INACTIVO, null);
+        Producto segundo = new Producto("P-001", "Otro nombre", "", 99.0, 15.0, Estado.INACTIVO, null);
         Cliente clienteUno = new Cliente("1100001234", "Ana");
         Cliente clienteDos = new Cliente("1100001234", "Otro nombre");
         Producto otroProducto = new Producto("P-002", "Mouse");

@@ -25,6 +25,10 @@ public final class RegistroClientesSQLite extends ColeccionSQLite<Cliente> imple
         super(archivoBaseDatos);
     }
 
+    public RegistroClientesSQLite(BaseDatosSQLite baseDatos) {
+        super(baseDatos);
+    }
+
     @Override
     public void registrar(Cliente cliente) {
         if (cliente == null) {
@@ -51,6 +55,50 @@ public final class RegistroClientesSQLite extends ColeccionSQLite<Cliente> imple
     }
 
     @Override
+    public Cliente actualizar(Cliente cliente) {
+        if (cliente == null) {
+            throw new IllegalArgumentException("El cliente no puede ser null");
+        }
+        String sql = "UPDATE clientes SET nombre = ?, direccion = ?, telefono = ?, email = ?, tipo = ?, estado = ?"
+                + " WHERE identificacion = ?";
+        try (Connection conexion = abrirConexion();
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, cliente.getNombre());
+            sentencia.setString(2, cliente.getDireccion());
+            sentencia.setString(3, cliente.getTelefono());
+            sentencia.setString(4, cliente.getEmail().valor());
+            sentencia.setString(5, cliente.getTipo().name());
+            sentencia.setString(6, cliente.getEstado().name());
+            sentencia.setString(7, cliente.getIdentificacion().valor());
+            if (sentencia.executeUpdate() == 0) {
+                throw new IllegalArgumentException("No existe el cliente " + cliente.getIdentificacion());
+            }
+            return buscarPorIdentificacion(cliente.getIdentificacion());
+        } catch (SQLException error) {
+            throw new IllegalStateException("No se pudo actualizar el cliente", error);
+        }
+    }
+
+    @Override
+    public void eliminar(String identificacion) {
+        RUC ruc = new RUC(identificacion);
+        try (Connection conexion = abrirConexion();
+                PreparedStatement sentencia =
+                        conexion.prepareStatement("DELETE FROM clientes WHERE identificacion = ?")) {
+            sentencia.setString(1, ruc.valor());
+            if (sentencia.executeUpdate() == 0) {
+                throw new IllegalArgumentException("No existe el cliente " + ruc);
+            }
+        } catch (SQLException error) {
+            if (error.getErrorCode() == 19) {
+                throw new IllegalStateException(
+                        "No se puede eliminar el cliente porque tiene proformas asociadas", error);
+            }
+            throw new IllegalStateException("No se pudo eliminar el cliente", error);
+        }
+    }
+
+    @Override
     public Cliente buscarPorIdentificacion(RUC identificacion) {
         if (identificacion == null) {
             throw new IllegalArgumentException("La identificacion no puede ser null");
@@ -68,15 +116,15 @@ public final class RegistroClientesSQLite extends ColeccionSQLite<Cliente> imple
 
     @Override
     public List<Cliente> buscar(String texto) {
-        String patron = "%" + (texto == null ? "" : texto.trim()) + "%";
+        String patronIdentificacion = patronLike(texto, true);
+        String patronNombre = patronLike(texto, false);
         return consultarLista(
                 "SELECT " + COLUMNAS
-                        + " FROM clientes WHERE identificacion LIKE ? COLLATE NOCASE OR nombre LIKE ? COLLATE NOCASE"
-                        + " OR email LIKE ? COLLATE NOCASE ORDER BY identificacion",
+                        + " FROM clientes WHERE identificacion LIKE ? ESCAPE '\\'"
+                        + " OR nombre LIKE ? ESCAPE '\\' COLLATE NOCASE ORDER BY identificacion",
                 sentencia -> {
-                    sentencia.setString(1, patron);
-                    sentencia.setString(2, patron);
-                    sentencia.setString(3, patron);
+                    sentencia.setString(1, patronIdentificacion);
+                    sentencia.setString(2, patronNombre);
                 });
     }
 

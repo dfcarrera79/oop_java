@@ -11,6 +11,10 @@ public interface RegistroClientes {
     /** Registra un cliente o lanza una excepcion si su identificacion ya existe. */
     void registrar(Cliente cliente);
 
+    Cliente actualizar(Cliente cliente);
+
+    void eliminar(String identificacion);
+
     /** Retorna el cliente encontrado o null cuando la identificacion no esta registrada. */
     Cliente buscarPorIdentificacion(RUC identificacion);
 
@@ -22,7 +26,7 @@ public interface RegistroClientes {
     /** Retorna los clientes registrados sin exponer la coleccion interna. */
     List<Cliente> listar();
 
-    /** Busca parcialmente por identificacion, nombre o correo, sin distinguir mayusculas. */
+    /** Busca por prefijo de identificacion o fragmento de nombre, sin distinguir mayusculas. */
     List<Cliente> buscar(String texto);
 
     /** Persiste un nuevo estado y retorna el cliente reconstruido. */

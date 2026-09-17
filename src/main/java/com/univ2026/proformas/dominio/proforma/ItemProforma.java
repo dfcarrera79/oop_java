@@ -2,28 +2,76 @@ package com.univ2026.proformas.dominio.proforma;
 
 import com.univ2026.proformas.dominio.Estado;
 import com.univ2026.proformas.dominio.cliente.TipoCliente;
+import com.univ2026.proformas.dominio.producto.AtributosDigitales;
+import com.univ2026.proformas.dominio.producto.AtributosFisicos;
 import com.univ2026.proformas.dominio.producto.Producto;
+import com.univ2026.proformas.dominio.producto.Talla;
+import com.univ2026.proformas.dominio.valor.Monto;
+import java.math.BigDecimal;
 
-/** Representa una linea calculable dentro de una proforma. */
+/** Linea de proforma cuyos datos comerciales son un snapshot historico. */
 public class ItemProforma {
     private Producto producto;
     private int cantidad;
+    private BigDecimal descuentoPct;
     private TipoCliente tipoCliente;
+    private String tipoProducto;
+    private Talla talla;
 
-    /** Crea un item sin descuento. */
     public ItemProforma(Producto producto, int cantidad) {
-        this(producto, cantidad, null);
+        this(producto, cantidad, BigDecimal.ZERO);
     }
 
-    /** Crea un item y aplica las mismas validaciones que los setters. */
     public ItemProforma(Producto producto, int cantidad, TipoCliente tipoCliente) {
+        this(producto, cantidad, tipoCliente, null);
+    }
+
+    /** Crea una linea usando la talla elegida o la talla fisica del producto cuando es null. */
+    public ItemProforma(Producto producto, int cantidad, TipoCliente tipoCliente, Talla talla) {
+        this(producto, cantidad, tipoCliente == null ? BigDecimal.ZERO : tipoCliente.getDescuento());
+        this.tipoCliente = tipoCliente;
+        if (talla != null) {
+            setTalla(talla);
+        }
+    }
+
+    public ItemProforma(Producto producto, int cantidad, BigDecimal descuentoPct) {
         setProducto(producto);
         setCantidad(cantidad);
-        setTipoCliente(tipoCliente);
+        setDescuentoPct(descuentoPct);
+    }
+
+    /** Reconstruye un snapshot sin consultar el catalogo actual. */
+    public static ItemProforma restaurar(
+            String codigo,
+            String nombre,
+            String descripcion,
+            String tipoProducto,
+            String talla,
+            TipoCliente tipoCliente,
+            BigDecimal precioBase,
+            int ivaPct,
+            int cantidad,
+            BigDecimal descuentoPct) {
+        ItemProforma item = new ItemProforma(
+                new Producto(codigo, nombre, descripcion, new Monto(precioBase), ivaPct, Estado.ACTIVO, null),
+                cantidad,
+                descuentoPct);
+        item.tipoProducto = textoOpcional(tipoProducto);
+        item.talla = talla == null || talla.isBlank() ? null : Talla.valueOf(talla);
+        item.tipoCliente = tipoCliente;
+        return item;
     }
 
     public Producto getProducto() {
-        return producto;
+        return new Producto(
+                producto.getCodigo(),
+                producto.getNombre(),
+                producto.getDescripcion(),
+                producto.getPrecio(),
+                producto.getIvaPct(),
+                Estado.ACTIVO,
+                producto.getExtras());
     }
 
     public void setProducto(Producto producto) {
@@ -33,7 +81,24 @@ public class ItemProforma {
         if (producto.getEstado() != Estado.ACTIVO) {
             throw new IllegalArgumentException("No se puede agregar un producto inactivo");
         }
-        this.producto = producto;
+        this.producto = new Producto(
+                producto.getCodigo(),
+                producto.getNombre(),
+                producto.getDescripcion(),
+                producto.getPrecio(),
+                producto.getIvaPct(),
+                Estado.ACTIVO,
+                producto.getExtras());
+        if (producto.getExtras() instanceof AtributosFisicos fisicos) {
+            tipoProducto = "FISICO";
+            talla = fisicos.talla();
+        } else if (producto.getExtras() instanceof AtributosDigitales) {
+            tipoProducto = "DIGITAL";
+            talla = null;
+        } else {
+            tipoProducto = "GENERAL";
+            talla = null;
+        }
     }
 
     public int getCantidad() {
@@ -47,8 +112,8 @@ public class ItemProforma {
         this.cantidad = cantidad;
     }
 
-    public double getDescuentoPct() {
-        return tipoCliente == null ? 0.0 : tipoCliente.getDescuentoPct();
+    public BigDecimal getDescuentoPct() {
+        return descuentoPct;
     }
 
     public TipoCliente getTipoCliente() {
@@ -57,28 +122,49 @@ public class ItemProforma {
 
     public void setTipoCliente(TipoCliente tipoCliente) {
         this.tipoCliente = tipoCliente;
+        setDescuentoPct(tipoCliente == null ? BigDecimal.ZERO : tipoCliente.getDescuento());
     }
 
-    /** Calcula precio por cantidad menos el descuento. */
-    public double calcularSubtotal() {
-        if (producto.getEstado() != Estado.ACTIVO) {
-            throw new IllegalStateException("No se puede calcular un producto inactivo");
+    public void setDescuentoPct(BigDecimal descuentoPct) {
+        if (descuentoPct == null || descuentoPct.signum() < 0 || descuentoPct.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("El descuento debe estar entre 0 y 100");
         }
-        double precioConDescuento = producto.getPrecio().doubleValue() * (1 - getDescuentoPct() / 100);
-        double subtotal = precioConDescuento * cantidad;
-        if (!Double.isFinite(subtotal)) {
-            throw new IllegalStateException("El subtotal excede el rango permitido");
-        }
-        return subtotal;
+        this.descuentoPct = descuentoPct.stripTrailingZeros();
     }
 
-    /** Calcula el impuesto sobre el subtotal descontado. */
-    public double calcularImpuesto() {
-        return calcularSubtotal() * producto.getIvaPct() / 100;
+    public String getTipoProducto() {
+        return tipoProducto;
     }
 
-    /** Calcula el valor final de la linea. */
-    public double calcularTotal() {
-        return calcularSubtotal() + calcularImpuesto();
+    public Talla getTalla() {
+        return talla;
+    }
+
+    public void setTalla(Talla talla) {
+        this.talla = talla;
+    }
+
+    public BigDecimal calcularDescuento() {
+        BigDecimal bruto = producto.getPrecio().valor().multiply(BigDecimal.valueOf(cantidad));
+        return Monto.normalizar(bruto.multiply(descuentoPct).movePointLeft(2));
+    }
+
+    public BigDecimal calcularSubtotal() {
+        BigDecimal bruto = producto.getPrecio().valor().multiply(BigDecimal.valueOf(cantidad));
+        return Monto.normalizar(bruto.subtract(calcularDescuento()));
+    }
+
+    public BigDecimal calcularImpuesto() {
+        return Monto.normalizar(calcularSubtotal()
+                .multiply(BigDecimal.valueOf(producto.getIvaPct()))
+                .movePointLeft(2));
+    }
+
+    public BigDecimal calcularTotal() {
+        return Monto.normalizar(calcularSubtotal().add(calcularImpuesto()));
+    }
+
+    private static String textoOpcional(String valor) {
+        return valor == null ? "" : valor.trim();
     }
 }
