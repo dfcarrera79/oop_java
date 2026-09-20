@@ -18,17 +18,4 @@ public enum Talla {
     public String getEtiqueta() {
         return etiqueta;
     }
-
-    /** Busca una talla por su etiqueta; una cadena vacia representa talla omitida. */
-    public static Talla desdeEtiqueta(String etiqueta) {
-        if (etiqueta == null || etiqueta.isBlank()) {
-            return null;
-        }
-        for (Talla talla : values()) {
-            if (talla.etiqueta.equalsIgnoreCase(etiqueta.trim())) {
-                return talla;
-            }
-        }
-        throw new IllegalArgumentException("La talla no es valida");
-    }
 }

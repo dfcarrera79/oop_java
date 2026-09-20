@@ -13,8 +13,6 @@ import com.univ2026.proformas.dominio.proforma.Proforma;
 import com.univ2026.proformas.dominio.proforma.RepositorioProformas;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /** Fachada de casos de uso, independiente de consola y JDBC. */
 public class AplicacionProformas {
@@ -61,10 +59,6 @@ public class AplicacionProformas {
         return productos.buscar(texto);
     }
 
-    public Producto darBajaProducto(String codigo) {
-        return productos.cambiarEstado(codigo, Estado.INACTIVO);
-    }
-
     public void registrarCliente(Cliente cliente) {
         clientes.registrar(cliente);
     }
@@ -89,10 +83,6 @@ public class AplicacionProformas {
         return clientes.buscar(texto);
     }
 
-    public Cliente darBajaCliente(String identificacion) {
-        return clientes.cambiarEstado(identificacion, Estado.INACTIVO);
-    }
-
     public CuentaPago registrarCuenta(CuentaPago cuenta) {
         return cuentas.registrar(cuenta);
     }
@@ -107,10 +97,6 @@ public class AplicacionProformas {
 
     public List<CuentaPago> listarCuentas() {
         return cuentas.listar();
-    }
-
-    public List<CuentaPago> buscarCuentas(String texto) {
-        return cuentas.buscar(texto);
     }
 
     public Proforma crearProforma(
@@ -158,21 +144,5 @@ public class AplicacionProformas {
 
     public void eliminarProforma(String numero) {
         proformas.eliminar(numero);
-    }
-
-    public Map<String, Producto> indexarProductosPorCodigo() {
-        return productos.indexarPorCodigo();
-    }
-
-    public Set<String> listarCodigosProducto() {
-        return productos.listarCodigos();
-    }
-
-    public Map<String, Cliente> indexarClientesPorIdentificacion() {
-        return clientes.indexarPorIdentificacion();
-    }
-
-    public Set<String> listarIdentificacionesCliente() {
-        return clientes.listarIdentificaciones();
     }
 }

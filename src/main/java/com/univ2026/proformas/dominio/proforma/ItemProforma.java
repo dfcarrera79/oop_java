@@ -120,11 +120,6 @@ public class ItemProforma {
         return tipoCliente;
     }
 
-    public void setTipoCliente(TipoCliente tipoCliente) {
-        this.tipoCliente = tipoCliente;
-        setDescuentoPct(tipoCliente == null ? BigDecimal.ZERO : tipoCliente.getDescuento());
-    }
-
     public void setDescuentoPct(BigDecimal descuentoPct) {
         if (descuentoPct == null || descuentoPct.signum() < 0 || descuentoPct.compareTo(BigDecimal.valueOf(100)) > 0) {
             throw new IllegalArgumentException("El descuento debe estar entre 0 y 100");

@@ -20,10 +20,6 @@ public enum TipoCliente {
         return etiqueta;
     }
 
-    public double getDescuentoPct() {
-        return descuentoPct;
-    }
-
     public BigDecimal getDescuento() {
         return BigDecimal.valueOf(descuentoPct);
     }

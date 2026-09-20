@@ -44,10 +44,6 @@ public class Proforma {
         this.numero = nuevoNumero;
     }
 
-    public void setNumero(String numero) {
-        asignarNumero(numero);
-    }
-
     public Cliente getCliente() {
         return copiarCliente(cliente);
     }

@@ -28,10 +28,6 @@ public record Monto(BigDecimal valor) {
         this(convertir(valor));
     }
 
-    public double doubleValue() {
-        return valor.doubleValue();
-    }
-
     /** Normaliza cualquier resultado monetario con la politica unica del sistema. */
     public static BigDecimal normalizar(BigDecimal valor) {
         if (valor == null) {
