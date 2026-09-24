@@ -22,10 +22,6 @@ public final class BaseDatosSQLite {
         InicializadorEsquema.inicializar(this);
     }
 
-    public Path getArchivo() {
-        return archivo;
-    }
-
     Connection abrirConexion() throws SQLException {
         Connection conexion = DriverManager.getConnection(urlConexion);
         try (var sentencia = conexion.prepareStatement("PRAGMA foreign_keys = ON")) {

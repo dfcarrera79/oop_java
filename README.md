@@ -1,7 +1,15 @@
 # Sistema de Gestion de Proformas
 
-Aplicacion de escritorio de la clase 6 para administrar clientes, productos y
-proformas con Java 17, JavaFX 21, SQLite y PDFBox 3.
+Aplicacion de escritorio construida hasta la clase 6 para administrar clientes,
+productos y proformas con Java 17, JavaFX 21, SQLite y PDFBox 3. La rama
+`clase7` agrega ejemplos didacticos de TDA lineales, Repository y JUnit sin
+modificar el funcionamiento de la aplicacion.
+
+## Material de la clase 7
+
+- [Guia de la clase 7](docs/CLASE_7.md)
+- Ejemplos: `src/main/java/com/univ2026/proformas/clase7/EjemplosClase7.java`
+- Pruebas: `src/test/java/com/univ2026/proformas/clase7/EjemplosClase7Test.java`
 
 ## Requisitos
 
